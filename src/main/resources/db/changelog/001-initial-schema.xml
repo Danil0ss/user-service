@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <!-- ChangeSet для создания таблицы users -->
+
     <changeSet id="create-users-table-1" author="DanilaPrudnikau">
         <createTable tableName="users">
             <column name="id" type="BIGINT" autoIncrement="true">
