@@ -2,11 +2,8 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(
@@ -20,7 +17,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PaymentCard {
+public class PaymentCard  extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,16 +34,8 @@ public class PaymentCard {
     private String holder;
 
     @Column(name = "expiration_date", nullable = false)
-    private java.sql.Timestamp expirationDate;
+    private LocalDate expirationDate;
 
     @Column(nullable = false)
-    private Boolean active = false;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    private Boolean active;
 }
