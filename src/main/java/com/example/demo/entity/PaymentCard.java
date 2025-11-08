@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -34,7 +35,7 @@ public class PaymentCard  extends BaseEntity{
     private String holder;
 
     @Column(name = "expiration_date", nullable = false)
-    private LocalDate expirationDate;
+    private LocalDateTime expirationDate;
 
     @Column(nullable = false)
     private Boolean active;
