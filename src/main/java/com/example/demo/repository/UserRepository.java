@@ -33,6 +33,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
                    @Param("birthDate") LocalDate birthDate,
                    @Param("email") String email,
                    @Param("active") Boolean active);
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.active = :status WHERE u.id = :userId")
+    int updateActiveStatus(@Param("userId") Long userId, @Param("status") Boolean status);
     //Native SQL
     @Query(value = "SELECT * FROM users u WHERE u.surname = :surname", nativeQuery = true)
     List<User> findBySurnameNative(@Param("surname") String surname);

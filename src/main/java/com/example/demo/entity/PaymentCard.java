@@ -35,7 +35,7 @@ public class PaymentCard  extends BaseEntity{
     private String holder;
 
     @Column(name = "expiration_date", nullable = false)
-    private LocalDateTime expirationDate;
+    private LocalDate expirationDate;
 
     @Column(nullable = false)
     private Boolean active;

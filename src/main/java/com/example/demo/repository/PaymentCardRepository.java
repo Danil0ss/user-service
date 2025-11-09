@@ -8,9 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -21,17 +19,16 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> 
     //JPQL
     @Modifying
     @Transactional
-    @Query("UPDATE PaymentCard pc SET pc.user=COALESCE(:user, pc.user)," +
+    @Query("UPDATE PaymentCard pc SET " +
             "pc.number=COALESCE(:number, pc.number)," +
             "pc.holder=COALESCE(:holder, pc.holder)," +
             "pc.expirationDate=COALESCE(:expirationDate, pc.expirationDate)," +
             "pc.active=COALESCE(:active, pc.active)" +
             "WHERE pc.id=:id")
     int updateCard(@Param("id") Long id,
-                   @Param("user")User user,
                    @Param("number") String number,
                    @Param("holder") String holder,
-                   @Param("expirationDate") LocalDateTime expirationDate,
+                   @Param("expirationDate") LocalDate expirationDate,
                    @Param("active") Boolean active);
     //Native SQL
     @Modifying
