@@ -6,4 +6,5 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <include file="001-initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="002-expiration-date-type.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
