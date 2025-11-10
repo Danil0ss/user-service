@@ -16,5 +16,6 @@ public class PaymentCardUpdateDTO {
 
     @Future(message = "Expiration date must be in the future")
     private LocalDate expirationDate;
+
     private Boolean active;
 }
