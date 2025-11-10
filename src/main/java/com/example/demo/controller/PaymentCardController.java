@@ -26,7 +26,7 @@ public class PaymentCardController {
     }
 
     @PostMapping()
-    public ResponseEntity<PaymentCardResponseDTO> createCard(@PathVariable Long userId,@Valid @RequestBody PaymentCardCreateDTO createDto){
+    public ResponseEntity<PaymentCardResponseDTO> createCard(@PathVariable Long userId, @Valid @RequestBody PaymentCardCreateDTO createDto){
         PaymentCardResponseDTO createdCard = userService.createCard(userId,createDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCard);
     }

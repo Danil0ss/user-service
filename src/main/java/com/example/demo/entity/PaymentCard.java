@@ -1,10 +1,9 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.*; //to do
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(

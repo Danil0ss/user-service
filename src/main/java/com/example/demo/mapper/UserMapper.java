@@ -12,7 +12,6 @@ public interface UserMapper {
 
     UserResponseDTO toDto(User user);
 
-
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "active", constant = "true")
     @Mapping(target = "paymentCards", ignore = true)

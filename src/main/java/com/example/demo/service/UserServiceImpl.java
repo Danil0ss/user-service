@@ -16,6 +16,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
 
@@ -39,7 +42,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "users", key = "#id")
     public UserResponseDTO getUserById(Long id) {
+        System.out.println("--- Fetching user from DATABASE with id: " + id + " ---");
         return userRepository.findById(id)
                 .map(userMapper::toDto)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
@@ -55,6 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Cacheable(value = "users", key = "#id")
     public UserResponseDTO updateUser(Long id, UserUpdateDTO dto) {
         int updatedRows= userRepository.updateUser(id,
                 dto.getName(),
@@ -64,6 +70,7 @@ public class UserServiceImpl implements UserService {
                 dto.getActive());
         if (updatedRows ==0)
             throw new ResourceNotFoundException("User with ID " + id + " not found for update");
+        System.out.println("--- Updating user in DATABASE and CACHE with id: " + id + " ---");
         User updatedUser=userRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("Update failed, entity not found after update"));
         return userMapper.toDto(updatedUser);
@@ -80,7 +87,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Cacheable(value = "users", key = "#id")
     public void deleteUser(Long id) {
+        System.out.println("--- Deleting user from DATABASE and CACHE with id: " + id + " ---");
       User deleteUser = userRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("User with ID " + id +" not found"));
       userRepository.delete(deleteUser);
