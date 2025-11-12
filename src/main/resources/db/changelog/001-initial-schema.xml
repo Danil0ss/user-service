@@ -31,10 +31,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <createIndex
-                tableName="users" indexName="idx_users_email">
-            <column name="email"/>
-        </createIndex>
     </changeSet>
 
     <changeSet id="create-payment_cards-table-1" author="DanilaPrudnikau">
@@ -72,10 +68,6 @@
                 referencedColumnNames="id"
                 onDelete="CASCADE"
                 onUpdate="RESTRICT"/>
-        <createIndex
-                tableName="payment_cards" indexName="idx_cards_number">
-            <column name="number"/>
-        </createIndex>
         <createIndex tableName="payment_cards" indexName="idx_user_id">
             <column name="user_id"/>
         </createIndex>
