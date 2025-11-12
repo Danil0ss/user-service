@@ -31,6 +31,10 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <createIndex indexName="idx_users_name_surname" tableName="users">
+            <column name="name"/>
+            <column name="surname"/>
+        </createIndex>
     </changeSet>
 
     <changeSet id="create-payment_cards-table-1" author="DanilaPrudnikau">

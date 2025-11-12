@@ -17,7 +17,7 @@ import java.util.List;
 @Table(
         name = "users",
         indexes = {
-                @Index(name = "idx_users_email", columnList = "email")
+                @Index(name = "idx_users_name_surname", columnList = "name, surname")
         }
 )
 @EntityListeners(AuditingEntityListener.class)

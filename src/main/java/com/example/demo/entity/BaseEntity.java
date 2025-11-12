@@ -18,10 +18,10 @@ import java.time.OffsetDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private OffsetDateTime updatedAt;
 }
