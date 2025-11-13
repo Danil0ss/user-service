@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: .
+    container_name: user-service-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/user_service_db_new
+      - SPRING_DATASOURCE_USERNAME=user_service_user
+      - SPRING_DATASOURCE_PASSWORD=user_service_pass
+
+      - SPRING_DATA_REDIS_HOST=redis-cache
+      - SPRING_DATA_REDIS_PORT=6379
+
+    depends_on:
+      - postgres-db
+      - redis-cache
+
+  postgres-db:
+    image: postgres:16.1
+    container_name: postgres-db
+    environment:
+      - POSTGRES_DB=user_service_db_new
+      - POSTGRES_USER=user_service_user
+      - POSTGRES_PASSWORD=user_service_pass
+    ports:
+      - "5432:5432"
+
+  redis-cache:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
