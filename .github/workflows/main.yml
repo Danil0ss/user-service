@@ -61,11 +61,12 @@ jobs:
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
 
       - name: Analyze with SonarCloud
-        run: mvn -B verify sonar:sonar \
-          -Dsonar.projectKey=Danil0ss_user-service-internship \
-          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn -B verify sonar:sonar \
+            -Dsonar.projectKey=Danil0ss_user-service-internship \
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
         env:
           DB_URL: ${{ env.DB_URL }}
           DB_USER: ${{ env.DB_USER }}
