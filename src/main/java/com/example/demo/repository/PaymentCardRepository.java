@@ -19,7 +19,6 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> 
 
     //JPQL
     @Modifying
-    @Transactional
     @Query("UPDATE PaymentCard pc SET " +
             "pc.number=COALESCE(:number, pc.number)," +
             "pc.holder=COALESCE(:holder, pc.holder)," +
@@ -34,7 +33,6 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> 
 
     //Native SQL
     @Modifying
-    @Transactional
     @Query(value = "UPDATE payment_cards SET active=:active WHERE id=:id", nativeQuery = true)
     int updateCardStatus(@Param("id") Long id, @Param("active") Boolean active);
 }
