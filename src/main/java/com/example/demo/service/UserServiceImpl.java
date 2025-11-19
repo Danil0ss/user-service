@@ -35,7 +35,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserResponseDTO getUserById(Long id) {
        return userRepository.findById(id)
                 .map(userMapper::toDto)
@@ -43,7 +42,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<UserResponseDTO> getAllUsers(Pageable pageable, UserFilterDTO filter) {
         Specification<User> userSpec = UserSpecification.filterUsers(filter);
         Page<User> userPage = userRepository.findAll(userSpec, pageable);
@@ -84,7 +82,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<PaymentCardResponseDTO> getCardsByUserId(Long userId) {
         User user=userRepository.findById(userId)
                 .orElseThrow(()->new RuntimeException("User not found"));
