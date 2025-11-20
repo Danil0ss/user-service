@@ -13,10 +13,12 @@ import com.example.demo.service.specifications.UserSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.List;
@@ -108,8 +110,11 @@ public class UserServiceImpl implements UserService {
     public PaymentCardResponseDTO createCard(Long userId, PaymentCardCreateDTO cardDto) {
         User user=userRepository.findById(userId)
                 .orElseThrow(()->new ResourceNotFoundException("User not founded"));
-        if(user.getPaymentCards().size()>4){
-            throw new BusinessLogicException("Cards limit overflow");
+        if(user.getPaymentCards().size()>=5){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Maximum 5 cards allowed per user"
+            );
         }
         PaymentCard card= paymentCardMapper.toEntity(cardDto);
         card.setUser(user);

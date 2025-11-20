@@ -7,7 +7,18 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.autoconfigure.exclude=" +
+                        "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration",
+                "spring.cache.type=none",
+                "spring.jpa.properties.hibernate.cache.use_second_level_cache=false",
+                "spring.jpa.properties.hibernate.cache.use_query_cache=false",
+                "spring.jpa.properties.hibernate.javax.cache.missing_cache_strategy=create"
+        }
+)
 @Testcontainers
 public abstract class BaseIntegrationTest {
 
