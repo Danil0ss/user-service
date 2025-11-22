@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.dto.*;
 import com.example.demo.entity.PaymentCard;
 import com.example.demo.entity.User;
+import com.example.demo.exception.BusinessLogicException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.mapper.PaymentCardMapper;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.PaymentCardRepository;
@@ -11,14 +13,18 @@ import com.example.demo.service.specifications.UserSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.server.ResponseStatusException;
+
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -35,13 +41,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "users", key = "#id")
     public UserResponseDTO getUserById(Long id) {
-       return userRepository.findById(id)
+        System.out.println("--- Fetching user from DATABASE with id: " + id + " ---");
+        return userRepository.findById(id)
                 .map(userMapper::toDto)
-                .orElseThrow(()->new RuntimeException("User not found"));
+                .orElseThrow(()->new ResourceNotFoundException("User not found"));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponseDTO> getAllUsers(Pageable pageable, UserFilterDTO filter) {
         Specification<User> userSpec = UserSpecification.filterUsers(filter);
         Page<User> userPage = userRepository.findAll(userSpec, pageable);
@@ -50,6 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Cacheable(value = "users", key = "#id")
     public UserResponseDTO updateUser(Long id, UserUpdateDTO dto) {
         int updatedRows= userRepository.updateUser(id,
                 dto.getName(),
@@ -58,9 +69,10 @@ public class UserServiceImpl implements UserService {
                 dto.getEmail(),
                 dto.getActive());
         if (updatedRows ==0)
-            throw new RuntimeException("User with ID " + id + " not found for update");
+            throw new ResourceNotFoundException("User with ID " + id + " not found for update");
+        System.out.println("--- Updating user in DATABASE and CACHE with id: " + id + " ---");
         User updatedUser=userRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Update failed, entity not found after update"));
+                .orElseThrow(()->new ResourceNotFoundException("Update failed, entity not found after update"));
         return userMapper.toDto(updatedUser);
     }
 
@@ -69,22 +81,25 @@ public class UserServiceImpl implements UserService {
     public void setActiveStatus(Long id, boolean isActive) {
         int updaterRows= userRepository.updateActiveStatus(id,isActive);
         if (updaterRows==0) {
-            throw new RuntimeException("User with ID "+id+" not founded or status have been already set");
+            throw new ResourceNotFoundException("User with ID "+id+" not founded or status have been already set");
         }
     }
 
     @Override
     @Transactional
+    @Cacheable(value = "users", key = "#id")
     public void deleteUser(Long id) {
-       User deleteUser = userRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("User with ID " + id +" not found"));
+        System.out.println("--- Deleting user from DATABASE and CACHE with id: " + id + " ---");
+      User deleteUser = userRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("User with ID " + id +" not found"));
       userRepository.delete(deleteUser);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PaymentCardResponseDTO> getCardsByUserId(Long userId) {
         User user=userRepository.findById(userId)
-                .orElseThrow(()->new RuntimeException("User not found"));
+                .orElseThrow(()->new ResourceNotFoundException("User not found"));
         return user.getPaymentCards().stream()
                 .map(paymentCardMapper::toDto)
                 .toList();
@@ -94,9 +109,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public PaymentCardResponseDTO createCard(Long userId, PaymentCardCreateDTO cardDto) {
         User user=userRepository.findById(userId)
-                .orElseThrow(()->new RuntimeException("User not founded"));
-        if(user.getPaymentCards().size()>4){
-            throw new RuntimeException("Cards limit overflow");
+                .orElseThrow(()->new ResourceNotFoundException("User not founded"));
+        if(user.getPaymentCards().size()>=5){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Maximum 5 cards allowed per user"
+            );
         }
         PaymentCard card= paymentCardMapper.toEntity(cardDto);
         card.setUser(user);
@@ -105,16 +123,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public PaymentCardResponseDTO updateCard(Long id, PaymentCardUpdateDTO dto) {
         int updatedRows= paymentCardRepository.updateCard(id,
                 dto.getNumber(),
                 dto.getHolder(),
                 dto.getExpirationDate(),
                 dto.getActive());
-        if(updatedRows==0) throw new RuntimeException("Card with ID " + id + " not found for update");
+        if(updatedRows==0) throw new ResourceNotFoundException("Card with ID " + id + " not found for update");
         PaymentCard updatedCard=paymentCardRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Update failed, entity not found after update"));
+                .orElseThrow(()->new ResourceNotFoundException("Update failed, entity not found after update"));
         return paymentCardMapper.toDto(updatedCard);
     }
 
@@ -122,7 +139,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteCard(Long cardId) {
         PaymentCard deleteCard=paymentCardRepository.findById(cardId)
-                .orElseThrow(()->new RuntimeException("Card with "+cardId+" not found"));
+                .orElseThrow(()->new ResourceNotFoundException("Card with "+cardId+" not found"));
         paymentCardRepository.delete(deleteCard);
     }
 
