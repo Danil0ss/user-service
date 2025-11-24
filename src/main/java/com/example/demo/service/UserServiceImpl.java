@@ -143,4 +143,10 @@ public class UserServiceImpl implements UserService {
         paymentCardRepository.delete(deleteCard);
     }
 
+    @Override
+    public List<UserResponseDTO> getAllUsersForAdmin() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
 }

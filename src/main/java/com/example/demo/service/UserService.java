@@ -18,4 +18,5 @@ public interface UserService {
     PaymentCardResponseDTO createCard(Long userId, PaymentCardCreateDTO cardDto);
     PaymentCardResponseDTO updateCard(Long id,PaymentCardUpdateDTO dto);
     void deleteCard(Long cardId);
+    List<UserResponseDTO> getAllUsersForAdmin();
 }
