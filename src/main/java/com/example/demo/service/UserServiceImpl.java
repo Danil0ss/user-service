@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.List;
