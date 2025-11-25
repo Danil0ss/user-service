@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CachePut(value = "users", key = "#savedUser.id")
+    @CachePut(value = "users", key = "#result.id")
     public UserResponseDTO createUser(UserCreateDTO dto) {
         User user=userMapper.toEntity(dto);
         User savedUser = userRepository.save(user);
@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-//    @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     @Cacheable(value = "users", key = "#id")
     public UserResponseDTO getUserById(Long id) {
         System.out.println("--- Fetching user from DATABASE with id: " + id + " ---");
@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CachePut(value = "users", key = "#userId")
+    @CacheEvict(value = "users", key = "#userId")
     public PaymentCardResponseDTO createCard(Long userId, PaymentCardCreateDTO cardDto) {
         User user=userRepository.findById(userId)
                 .orElseThrow(()->new ResourceNotFoundException("User not founded"));
@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CachePut(value = "users", key = "#result.user.id")
+    @CacheEvict(value = "users", key = "#user.id")
     public PaymentCardResponseDTO updateCard(Long id, PaymentCardUpdateDTO dto) {
         int updatedRows= paymentCardRepository.updateCard(id,
                 dto.getNumber(),
