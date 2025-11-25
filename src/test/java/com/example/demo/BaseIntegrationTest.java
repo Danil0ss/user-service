@@ -1,23 +1,17 @@
 package com.example.demo;
 
+
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-                "spring.autoconfigure.exclude=" +
-                        "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration," +
-                        "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration",
-                "spring.cache.type=none",
-                "spring.jpa.properties.hibernate.cache.use_second_level_cache=false",
-                "spring.jpa.properties.hibernate.cache.use_query_cache=false",
-                "spring.jpa.properties.hibernate.javax.cache.missing_cache_strategy=create"
-        }
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @Testcontainers
 public abstract class BaseIntegrationTest {
@@ -34,5 +28,14 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgresContainer::getUsername);
         registry.add("spring.datasource.password", postgresContainer::getPassword);
+    }
+
+    @TestConfiguration
+    static class TestApplicationConfiguration {
+
+        @org.springframework.context.annotation.Bean
+        public org.springframework.cache.CacheManager cacheManager() {
+            return new org.springframework.cache.support.NoOpCacheManager();
+        }
     }
 }
