@@ -16,6 +16,20 @@ jobs:
       contents: read
       checks: write
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user_service_user
+          POSTGRES_PASSWORD: user_service_pass
+          POSTGRES_DB: user_service_db_new
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user_service_user"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout PR code
@@ -34,14 +48,15 @@ jobs:
       - name: Build
         run: mvn -B compile
 
-      - name: Test (Unit & Integration Tests)
+      - name: Test
         run: mvn -B test
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/user_service_db_new
+          DB_USER: user_service_user
+          DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       - name: SonarCloud Analysis
         run: |
-          # Для Sonar-анализа требуется полная сборка (verify) и сам анализ.
-          # У Sonar есть своя DB, или он не требует ее. 
-          # Все необходимые properties для Sonar (Project Key, Token) уже в secrets.
           mvn -B verify sonar:sonar \
             -Dsonar.projectKey=Danil0ss_user-service-internship \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
@@ -50,7 +65,10 @@ jobs:
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
             -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} \
             -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
-      
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/user_service_db_new
+          DB_USER: user_service_user
+          DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -58,7 +76,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & Push Docker (Final Artifact)
+      - name: Build & Push Docker
         uses: docker/build-push-action@v5
         with:
           context: .
