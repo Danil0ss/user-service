@@ -34,5 +34,7 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgresContainer::getUsername);
         registry.add("spring.datasource.password", postgresContainer::getPassword);
+        registry.add("spring.cache.type", () -> "none");
+        registry.add("spring.data.redis.host", () -> "disabled");
     }
 }
