@@ -16,20 +16,6 @@ jobs:
       contents: read
       checks: write
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: user_service_user
-          POSTGRES_PASSWORD: user_service_pass
-          POSTGRES_DB: user_service_db_new
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U user_service_user"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout PR code
