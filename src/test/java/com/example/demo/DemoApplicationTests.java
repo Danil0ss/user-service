@@ -3,6 +3,9 @@ package com.example.demo;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+// ====================================================================================================
+// Изолируем Unit Test от ВСЕХ зависимостей DB/JPA/Liquibase/Cache
+// ====================================================================================================
 
 @SpringBootTest(properties = {
 		"spring.liquibase.enabled=false",
