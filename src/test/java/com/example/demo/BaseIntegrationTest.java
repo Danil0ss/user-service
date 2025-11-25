@@ -1,17 +1,24 @@
 package com.example.demo;
 
-
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-
+// ВАЖНО: добавляем профиль test и исключаем Redis автоконфигурацию напрямую
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.cache.type=none",
+                // Принудительно отключаем Redis, даже если он на classpath
+                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration"
+        }
 )
 @Testcontainers
 public abstract class BaseIntegrationTest {
@@ -30,12 +37,13 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.password", postgresContainer::getPassword);
     }
 
-    @TestConfiguration
-    static class TestApplicationConfiguration {
-
-        @org.springframework.context.annotation.Bean
-        public org.springframework.cache.CacheManager cacheManager() {
-            return new org.springframework.cache.support.NoOpCacheManager();
+    // Этот бин — 100% гарантия, что кэш будет NoOp, даже если что-то пошло не так
+    @org.springframework.boot.test.context.TestConfiguration
+    static class TestCacheConfig {
+        @Bean
+        @Primary
+        public CacheManager cacheManager() {
+            return new NoOpCacheManager();
         }
     }
 }

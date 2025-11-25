@@ -3,9 +3,8 @@ name: CI Pipeline
 on:
   push:
     branches: [ "main" ]
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
-    branches: [ "*" ]
 
 jobs:
   ci:
@@ -16,12 +15,10 @@ jobs:
       contents: read
       checks: write
 
-
     steps:
-      - name: Checkout PR code
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Set up JDK 21
@@ -31,11 +28,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build
-        run: mvn -B compile
-
-      - name: Test
-        run: mvn -B test
+      - name: Test with Coverage
+        run: mvn -B verify jacoco:report
         env:
           DB_URL: jdbc:postgresql://localhost:5432/user_service_db_new
           DB_USER: user_service_user
@@ -43,30 +37,35 @@ jobs:
 
       - name: SonarCloud Analysis
         run: |
-          mvn -B verify sonar:sonar \
+          mvn -B sonar:sonar \
             -Dsonar.projectKey=Danil0ss_user-service-internship \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
-            -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} \
-            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            ${{ github.event_name == 'pull_request' && format('-Dsonar.pullrequest.key={0} -Dsonar.pullrequest.branch={1} -Dsonar.pullrequest.base={2}', github.event.pull_request.number, github.event.pull_request.head.ref, github.event.pull_request.base.ref) || '' }}
         env:
           DB_URL: jdbc:postgresql://localhost:5432/user_service_db_new
           DB_USER: user_service_user
           DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
+      # ────────────────────── DOCKER (только на main) ──────────────────────
       - name: Login to DockerHub
+        if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.POSTGRES_PASSWORD }}
 
-      - name: Build & Push Docker
+      - name: Build & Push Docker image
+        if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/user-service:${{ github.sha }}
+            danil0ss/user-service:latest
+            danil0ss/user-service:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
