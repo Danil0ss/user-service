@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   user-service:
     build: .
     container_name: user-service-app
     ports:
-      - "8080:8080"
+      - "8081:8081"
     env_file:
       - .env
     environment:
@@ -13,6 +11,8 @@ services:
     depends_on:
       - postgres-db
       - redis-cache
+    networks:
+      - my-app-net
 
   postgres-db:
     image: postgres:16.1
@@ -27,12 +27,20 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - my-app-net
 
   redis-cache:
     image: redis:7-alpine
     container_name: redis-cache
     ports:
       - "6379:6379"
+    networks:
+      - my-app-net
 
 volumes:
   postgres_data:
+
+networks:
+  my-app-net:
+    external: true
