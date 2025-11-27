@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.server.ResponseStatusException;
-
 
 import java.util.List;
 
@@ -39,7 +37,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @CachePut(value = "users", key = "#result.id")
     public UserResponseDTO createUser(UserCreateDTO dto) {
-        User user=userMapper.toEntity(dto);
+        User user = userMapper.toEntity(dto);
         User savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);
     }
@@ -51,7 +49,7 @@ public class UserServiceImpl implements UserService {
         System.out.println("--- Fetching user from DATABASE with id: " + id + " ---");
         return userRepository.findById(id)
                 .map(userMapper::toDto)
-                .orElseThrow(()->new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     @Override
@@ -100,15 +98,15 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         System.out.println("--- Deleting user from DATABASE and CACHE with id: " + id + " ---");
         User deleteUser = userRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("User with ID " + id +" not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + id + " not found"));
         userRepository.delete(deleteUser);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PaymentCardResponseDTO> getCardsByUserId(Long userId) {
-        User user=userRepository.findById(userId)
-                .orElseThrow(()->new ResourceNotFoundException("User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return user.getPaymentCards().stream()
                 .map(paymentCardMapper::toDto)
                 .toList();
@@ -118,14 +116,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @CacheEvict(value = "users", key = "#userId")
     public PaymentCardResponseDTO createCard(Long userId, PaymentCardCreateDTO cardDto) {
-        User user=userRepository.findById(userId)
-                .orElseThrow(()->new ResourceNotFoundException("User not founded"));
-        if(user.getPaymentCards().size()>4){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not founded"));
+        if (user.getPaymentCards().size() > 4) {
             throw new BusinessLogicException("Cards limit overflow");
         }
-        PaymentCard card= paymentCardMapper.toEntity(cardDto);
+        PaymentCard card = paymentCardMapper.toEntity(cardDto);
         card.setUser(user);
-        PaymentCard savedCard=paymentCardRepository.save(card);
+        PaymentCard savedCard = paymentCardRepository.save(card);
         return paymentCardMapper.toDto(savedCard);
     }
 
@@ -156,7 +154,6 @@ public class UserServiceImpl implements UserService {
         return paymentCardMapper.toDto(updatedCard);
     }
 
-
     @Override
     @Transactional
     public void deleteCard(Long cardId) {
@@ -175,11 +172,5 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll().stream()
                 .map(userMapper::toDto)
                 .toList();
-    }
-
-        Long userId = card.getUser().getId();
-        paymentCardRepository.delete(card);
-
-        cacheManager.getCache("users").evict(userId);
     }
 }

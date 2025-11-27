@@ -11,13 +11,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-// ВАЖНО: добавляем профиль test и исключаем Redis автоконфигурацию напрямую
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
+                "spring.profiles.active=test",
                 "spring.cache.type=none",
-                // Принудительно отключаем Redis, даже если он на classpath
-                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration"
+                "spring.data.redis.enabled=false",
+                "spring.autoconfigure.exclude=" +
+                        "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration"
         }
 )
 @Testcontainers
@@ -37,7 +39,6 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.password", postgresContainer::getPassword);
     }
 
-    // Этот бин — 100% гарантия, что кэш будет NoOp, даже если что-то пошло не так
     @org.springframework.boot.test.context.TestConfiguration
     static class TestCacheConfig {
         @Bean

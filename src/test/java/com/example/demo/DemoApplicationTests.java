@@ -23,9 +23,5 @@ class DemoApplicationTests {
 	@Configuration
 	static class TestApplicationConfiguration {
 
-		@org.springframework.context.annotation.Bean
-		public org.springframework.cache.CacheManager cacheManager() {
-			return new org.springframework.cache.support.NoOpCacheManager();
-		}
 	}
 }
