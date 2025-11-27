@@ -35,6 +35,6 @@ public class InternalUserController {
         user.setActive(true);
 
         User saved = userRepository.save(user);
-        return ResponseEntity.ok(saved.getId()); // ← возвращаем настоящий id из UserService
+        return ResponseEntity.ok(saved.getId());
     }
 }

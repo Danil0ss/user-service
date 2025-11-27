@@ -11,9 +11,11 @@ import com.example.demo.repository.PaymentCardRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.specifications.UserSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -31,9 +33,11 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PaymentCardRepository paymentCardRepository;
     private final PaymentCardMapper paymentCardMapper;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
+    @CachePut(value = "users", key = "#result.id")
     public UserResponseDTO createUser(UserCreateDTO dto) {
         User user=userMapper.toEntity(dto);
         User savedUser = userRepository.save(user);
@@ -60,39 +64,44 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @Cacheable(value = "users", key = "#id")
+    @CachePut(value = "users", key = "#id")
     public UserResponseDTO updateUser(Long id, UserUpdateDTO dto) {
-        int updatedRows= userRepository.updateUser(id,
+        int updatedRows = userRepository.updateUser(
+                id,
                 dto.getName(),
                 dto.getSurname(),
                 dto.getBirthDate(),
                 dto.getEmail(),
-                dto.getActive());
-        if (updatedRows ==0)
+                dto.getActive()
+        );
+        if (updatedRows == 0) {
             throw new ResourceNotFoundException("User with ID " + id + " not found for update");
+        }
         System.out.println("--- Updating user in DATABASE and CACHE with id: " + id + " ---");
-        User updatedUser=userRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Update failed, entity not found after update"));
+        User updatedUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User disappeared after update"));
+
         return userMapper.toDto(updatedUser);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "users", key = "#id")
     public void setActiveStatus(Long id, boolean isActive) {
-        int updaterRows= userRepository.updateActiveStatus(id,isActive);
-        if (updaterRows==0) {
-            throw new ResourceNotFoundException("User with ID "+id+" not founded or status have been already set");
+        int updated = userRepository.updateActiveStatus(id, isActive);
+        if (updated == 0) {
+            throw new ResourceNotFoundException("User not found or status already " + isActive);
         }
     }
 
     @Override
     @Transactional
-    @Cacheable(value = "users", key = "#id")
+    @CacheEvict(value = "users", key = "#id")
     public void deleteUser(Long id) {
         System.out.println("--- Deleting user from DATABASE and CACHE with id: " + id + " ---");
-      User deleteUser = userRepository.findById(id)
+        User deleteUser = userRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("User with ID " + id +" not found"));
-      userRepository.delete(deleteUser);
+        userRepository.delete(deleteUser);
     }
 
     @Override
@@ -107,14 +116,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "users", key = "#userId")
     public PaymentCardResponseDTO createCard(Long userId, PaymentCardCreateDTO cardDto) {
         User user=userRepository.findById(userId)
                 .orElseThrow(()->new ResourceNotFoundException("User not founded"));
-        if(user.getPaymentCards().size()>=5){
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Maximum 5 cards allowed per user"
-            );
+        if(user.getPaymentCards().size()>4){
+            throw new BusinessLogicException("Cards limit overflow");
         }
         PaymentCard card= paymentCardMapper.toEntity(cardDto);
         card.setUser(user);
@@ -123,30 +130,51 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public PaymentCardResponseDTO updateCard(Long id, PaymentCardUpdateDTO dto) {
-        int updatedRows= paymentCardRepository.updateCard(id,
+        PaymentCard card = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Card with ID " + id + " not found"));
+
+        Long userId = card.getUser().getId();
+
+        int updatedRows = paymentCardRepository.updateCard(
+                id,
                 dto.getNumber(),
                 dto.getHolder(),
                 dto.getExpirationDate(),
-                dto.getActive());
-        if(updatedRows==0) throw new ResourceNotFoundException("Card with ID " + id + " not found for update");
-        PaymentCard updatedCard=paymentCardRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Update failed, entity not found after update"));
+                dto.getActive()
+        );
+        if (updatedRows == 0) {
+            throw new ResourceNotFoundException("Card with ID " + id + " not found for update");
+        }
+
+        PaymentCard updatedCard = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Update failed, entity not found after update"));
+
+        cacheManager.getCache("users").evict(userId);
+
         return paymentCardMapper.toDto(updatedCard);
     }
+
 
     @Override
     @Transactional
     public void deleteCard(Long cardId) {
-        PaymentCard deleteCard=paymentCardRepository.findById(cardId)
-                .orElseThrow(()->new ResourceNotFoundException("Card with "+cardId+" not found"));
-        paymentCardRepository.delete(deleteCard);
+        PaymentCard card = paymentCardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardId));
+
+        Long userId = card.getUser().getId();
+        paymentCardRepository.delete(card);
+
+        cacheManager.getCache("users").evict(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserResponseDTO> getAllUsersForAdmin() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDto)
                 .toList();
     }
+
 }

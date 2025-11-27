@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/security/JwtAuthenticationFilter.java
 package com.example.demo.security;
 
 import jakarta.servlet.FilterChain;
@@ -52,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
-            // Токен невалидный — просто пропускаем
+            // Токен невалидный
         }
 
         filterChain.doFilter(request, response);

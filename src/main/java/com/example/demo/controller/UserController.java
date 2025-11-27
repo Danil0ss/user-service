@@ -21,13 +21,12 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/users")  // ← Важно: теперь /api/users, а не просто /users
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    // 1. Получить данные текущего пользователя (самый важный эндпоинт!)
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getCurrentUser() {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -35,7 +34,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // 2. Только админ может видеть любого пользователя по ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         checkAdminRole();
@@ -43,14 +41,12 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
-    // 3. Создание пользователя — можно оставить открытым (регистрация)
     @PostMapping("/register")  // ← Лучше вынести регистрацию отдельно
     public ResponseEntity<UserResponseDTO> registerUser(@Valid @RequestBody UserCreateDTO createDto) {
         UserResponseDTO createdUser = userService.createUser(createDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    // 4. Получить всех пользователей — только админ
     @GetMapping
     public ResponseEntity<Page<UserResponseDTO>> getAllUsers(Pageable pageable, UserFilterDTO filter) {
         checkAdminRole();
@@ -58,8 +54,6 @@ public class UserController {
         return ResponseEntity.ok(page);
     }
 
-    // 5. Обновить СВОИ данные — обычный пользователь
-    //    Обновить ЧУЖИЕ данные — только админ
     @PutMapping("/me")
     public ResponseEntity<UserResponseDTO> updateMyProfile(@Valid @RequestBody UserUpdateDTO updateDto) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -74,7 +68,17 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    // 6. Удалить пользователя — только админ
+    @PatchMapping("/{id}/active")
+    public ResponseEntity<Void> setUserActiveStatus(
+            @PathVariable Long id,
+            @RequestParam boolean active
+    ) {
+        checkAdminRole();
+        userService.setActiveStatus(id, active);
+        return ResponseEntity.noContent().build(); // 204
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         checkAdminRole();
@@ -82,7 +86,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // Вспомогательный метод — проверка, что юзер — админ
     private void checkAdminRole() {
         boolean isAdmin = SecurityContextHolder.getContext()
                 .getAuthentication()
