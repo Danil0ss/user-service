@@ -131,24 +131,51 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "users", key = "#user.id")
     public PaymentCardResponseDTO updateCard(Long id, PaymentCardUpdateDTO dto) {
-        int updatedRows= paymentCardRepository.updateCard(id,
+        PaymentCard card = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Card with ID " + id + " not found"));
+
+        Long userId = card.getUser().getId();
+
+        int updatedRows = paymentCardRepository.updateCard(
+                id,
                 dto.getNumber(),
                 dto.getHolder(),
                 dto.getExpirationDate(),
-                dto.getActive());
-        if(updatedRows==0) throw new ResourceNotFoundException("Card with ID " + id + " not found for update");
-        PaymentCard updatedCard=paymentCardRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Update failed, entity not found after update"));
+                dto.getActive()
+        );
+        if (updatedRows == 0) {
+            throw new ResourceNotFoundException("Card with ID " + id + " not found for update");
+        }
+
+        PaymentCard updatedCard = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Update failed, entity not found after update"));
+
+        cacheManager.getCache("users").evict(userId);
+
         return paymentCardMapper.toDto(updatedCard);
     }
+
 
     @Override
     @Transactional
     public void deleteCard(Long cardId) {
         PaymentCard card = paymentCardRepository.findById(cardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found: " + cardId));
+
+        Long userId = card.getUser().getId();
+        paymentCardRepository.delete(card);
+
+        cacheManager.getCache("users").evict(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> getAllUsersForAdmin() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
 
         Long userId = card.getUser().getId();
         paymentCardRepository.delete(card);

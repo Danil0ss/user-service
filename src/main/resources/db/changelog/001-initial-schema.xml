@@ -42,9 +42,7 @@
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
+            <column name="user_id" type="BIGINT"/>
             <column name="number" type="VARCHAR(19)">
                 <constraints nullable="false" unique="true"/>
             </column>
