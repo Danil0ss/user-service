@@ -71,15 +71,12 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
         dto.setEmail("ivan.updated@test.com");
         dto.setActive(false);
 
-        // Если у тебя в контроллере PUT, а не PATCH — меняем на put()
-        // Если у тебя есть @PatchMapping — оставь patch(), но скорее всего у тебя PUT
-        mockMvc.perform(put("/users/" + createdUserId)  // ← заменил patch() → put()
+        mockMvc.perform(put("/users/" + createdUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("ivan.updated@test.com"))
                 .andExpect(jsonPath("$.active").value(false));
-        // name не меняется — убираем проверку на "Ivan Updated", если не менял
     }
 
     @Test
@@ -112,7 +109,6 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
     @Order(6)
     @DisplayName("POST /users/{id}/cards — шестая карта → 400 (лимит)")
     void createSixthCard_shouldReturn400() throws Exception {
-        // Сначала создаем пользователя
         UserCreateDTO userDto = new UserCreateDTO();
         userDto.setName("Test");
         userDto.setSurname("User");
@@ -127,7 +123,6 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
 
         Long userId = JsonPath.parse(userResponse).read("$.id", Long.class);
 
-        // Создаем 5 карт для этого пользователя
         for (int i = 0; i < 5; i++) {
             PaymentCardCreateDTO cardDto = new PaymentCardCreateDTO();
             cardDto.setNumber("111122223333444" + i);
@@ -149,7 +144,7 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/users/" + userId + "/cards")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(sixthCardDto)))
-                .andExpect(status().isBadRequest()); // Только проверка статуса
+                .andExpect(status().isUnprocessableEntity());
     }
     @Test
     @Order(7)

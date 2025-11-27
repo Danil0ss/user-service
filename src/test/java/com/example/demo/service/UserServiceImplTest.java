@@ -30,7 +30,7 @@ class UserServiceImplTest {
     private UserServiceImpl userService;
 
     @Test
-    void createUser_shouldSaveAndReturnUserDto() {
+    void createUserShouldSaveAndReturnUserDto() {
 
         UserCreateDTO createDto = new UserCreateDTO();
         createDto.setName("John");
@@ -64,7 +64,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void getUserById_whenUserExists_shouldReturnUserDto() {
+    void getUserByIdWhenUserExistsShouldReturnUserDto() {
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
@@ -84,7 +84,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void getUserById_whenUserDoesNotExist_shouldThrowException() {
+    void getUserByIdWhenUserDoesNotExistShouldThrowException() {
         Long userId = 99L;
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());

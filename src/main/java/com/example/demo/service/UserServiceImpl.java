@@ -177,4 +177,9 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+        Long userId = card.getUser().getId();
+        paymentCardRepository.delete(card);
+
+        cacheManager.getCache("users").evict(userId);
+    }
 }
