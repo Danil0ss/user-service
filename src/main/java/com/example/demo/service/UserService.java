@@ -5,7 +5,7 @@ import com.example.demo.dto.*;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable; // Для пагинации
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
     UserResponseDTO createUser(UserCreateDTO dto);

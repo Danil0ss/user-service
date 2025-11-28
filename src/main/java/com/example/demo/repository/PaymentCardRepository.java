@@ -1,7 +1,6 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.PaymentCard;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,11 +12,9 @@ import java.util.List;
 
 @Repository
 public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> {
-
-    //Named Method
     List<PaymentCard> findByUserId(Long userId);
 
-    //JPQL
+
     @Modifying
     @Query("UPDATE PaymentCard pc SET " +
             "pc.number=COALESCE(:number, pc.number)," +
@@ -31,7 +28,6 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> 
                    @Param("expirationDate") LocalDate expirationDate,
                    @Param("active") Boolean active);
 
-    //Native SQL
     @Modifying
     @Query(value = "UPDATE payment_cards SET active=:active WHERE id=:id", nativeQuery = true)
     int updateCardStatus(@Param("id") Long id, @Param("active") Boolean active);

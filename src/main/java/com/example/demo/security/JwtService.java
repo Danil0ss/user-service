@@ -25,24 +25,6 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(Long userId, String role) {
-        return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .claim("role", role)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + accessExpiration))
-                .signWith(getSigningKey())
-                .compact();
-    }
-
-    public String generateRefreshToken(Long userId) {
-        return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 604800000L))
-                .signWith(getSigningKey())
-                .compact();
-    }
 
     public Long extractUserId(String token) {
         return Long.valueOf(extractClaim(token, Claims::getSubject));
@@ -57,7 +39,6 @@ public class JwtService {
         return resolver.apply(claims);
     }
 
-    // ← ВОТ ЭТО ГЛАВНОЕ — НОВЫЙ API JJWT 0.12+
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
