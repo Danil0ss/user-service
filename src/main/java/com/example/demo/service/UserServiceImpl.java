@@ -173,4 +173,11 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toDto)
                 .toList();
     }
+
+    @Override
+    public UserResponseDTO getUserByEmail(String email) {
+        User user= userRepository.findByEmailAndActiveTrue(email)
+                .orElseThrow(()->new ResourceNotFoundException("User not found"));
+        return userMapper.toDto(user);
+    }
 }
