@@ -50,7 +50,6 @@ public class InternalUserController {
         return ResponseEntity.ok(userDto);
     }
 
-    // Тот самый метод поиска по email
     @GetMapping("/search")
     public ResponseEntity<UserResponseDTO> getUserByEmail(@RequestParam("email") String email) {
         UserResponseDTO userDto = userService.getUserByEmail(email);
