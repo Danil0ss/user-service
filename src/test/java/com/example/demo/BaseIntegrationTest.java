@@ -1,10 +1,6 @@
 package com.example.demo;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -17,34 +13,25 @@ import org.testcontainers.junit.jupiter.Testcontainers;
                 "spring.profiles.active=test",
                 "spring.cache.type=none",
                 "spring.data.redis.enabled=false",
-                "spring.autoconfigure.exclude=" +
-                        "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration," +
-                        "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration"
+                "jwt.secret=dGVzdC1zZWNyZXQta2V5LWZvci1pbnRlZ3JhdGlvbi10ZXN0cy1tdXN0LWJlLWxvbmc=",
+                "jwt.access-expiration=3600000",
+                "jwt.refresh-expiration=3600000"
         }
 )
 @Testcontainers
 public abstract class BaseIntegrationTest {
 
     @Container
-    private static final PostgreSQLContainer<?> postgresContainer =
-            new PostgreSQLContainer<>("postgres:16.1")
-                    .withDatabaseName("test-db")
-                    .withUsername("test")
-                    .withPassword("test");
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+            .withDatabaseName("test-db")
+            .withUsername("test")
+            .withPassword("test");
 
     @DynamicPropertySource
-    static void postgresqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgresContainer::getUsername);
-        registry.add("spring.datasource.password", postgresContainer::getPassword);
-    }
-
-    @org.springframework.boot.test.context.TestConfiguration
-    static class TestCacheConfig {
-        @Bean
-        @Primary
-        public CacheManager cacheManager() {
-            return new NoOpCacheManager();
-        }
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.liquibase.enabled", () -> "true");
     }
 }

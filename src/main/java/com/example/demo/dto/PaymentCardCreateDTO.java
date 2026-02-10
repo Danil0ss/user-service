@@ -1,6 +1,7 @@
 package com.example.demo.dto;
 
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -17,6 +18,6 @@ public class PaymentCardCreateDTO {
     @Size(max=100,message = "Holder name is too long")
     private String holder;
 
-    @Future(message = "Expiration date must be in the future")
+    @FutureOrPresent(message = "Expiration date must be in the future")
     private LocalDate expirationDate;
 }

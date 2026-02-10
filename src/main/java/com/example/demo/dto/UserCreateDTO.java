@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -18,6 +19,7 @@ public class UserCreateDTO {
 
     @NotNull(message = "Birth date is mandatory")
     @Past(message = "Birth date must be in the past")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
     @NotBlank(message = "Email cannot be empty")
