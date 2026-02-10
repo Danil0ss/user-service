@@ -20,4 +20,5 @@ public interface UserService {
     void deleteCard(Long cardId);
     List<UserResponseDTO> getAllUsersForAdmin();
     UserResponseDTO getUserByEmail(String email);
+    Long createUserInternal(UserCreateDTO dto);
 }

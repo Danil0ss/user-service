@@ -4,34 +4,38 @@ import com.example.demo.dto.UserCreateDTO;
 import com.example.demo.dto.UserResponseDTO;
 import com.example.demo.entity.User;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.mapper.PaymentCardMapper;
 import com.example.demo.mapper.UserMapper;
+import com.example.demo.repository.PaymentCardRepository;
 import com.example.demo.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private UserMapper userMapper;
+    @Mock private UserRepository userRepository;
+    @Mock private UserMapper userMapper;
+    @Mock private PaymentCardRepository paymentCardRepository;
+    @Mock private PaymentCardMapper paymentCardMapper;
+    @Mock private CacheManager cacheManager;
 
     @InjectMocks
     private UserServiceImpl userService;
 
     @Test
-    void createUserShouldSaveAndReturnUserDto() {
-
+    void createUser_ShouldSaveAndReturnUserDto() {
+        // GIVEN
         UserCreateDTO createDto = new UserCreateDTO();
         createDto.setName("John");
 
@@ -47,24 +51,22 @@ class UserServiceImplTest {
         expectedResponse.setName("John");
 
         when(userMapper.toEntity(createDto)).thenReturn(userToSave);
-
         when(userRepository.save(userToSave)).thenReturn(savedUser);
-
         when(userMapper.toDto(savedUser)).thenReturn(expectedResponse);
 
+        // WHEN
         UserResponseDTO actualResponse = userService.createUser(createDto);
 
-        assertNotNull(actualResponse);
-        assertEquals(1L, actualResponse.getId());
-        assertEquals("John", actualResponse.getName());
+        // THEN (Используем AssertJ - это красивее)
+        assertThat(actualResponse).isNotNull();
+        assertThat(actualResponse.getId()).isEqualTo(1L);
+        assertThat(actualResponse.getName()).isEqualTo("John");
 
-        verify(userRepository, times(1)).save(userToSave);
-        verify(userMapper, times(1)).toEntity(createDto);
-        verify(userMapper, times(1)).toDto(savedUser);
+        verify(userRepository).save(userToSave);
     }
 
     @Test
-    void getUserByIdWhenUserExistsShouldReturnUserDto() {
+    void getUserById_WhenExists_ShouldReturnUserDto() {
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
@@ -73,26 +75,20 @@ class UserServiceImplTest {
         responseDto.setId(userId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
         when(userMapper.toDto(user)).thenReturn(responseDto);
 
         UserResponseDTO result = userService.getUserById(userId);
 
-        assertNotNull(result);
-        assertEquals(userId, result.getId());
-        verify(userRepository, times(1)).findById(userId);
+        assertThat(result.getId()).isEqualTo(userId);
     }
 
     @Test
-    void getUserByIdWhenUserDoesNotExistShouldThrowException() {
+    void getUserById_WhenNotExists_ShouldThrowException() {
         Long userId = 99L;
-
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            userService.getUserById(userId);
-        });
-
-        verify(userRepository, times(1)).findById(userId);
+        assertThatThrownBy(() -> userService.getUserById(userId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User not found");
     }
 }
