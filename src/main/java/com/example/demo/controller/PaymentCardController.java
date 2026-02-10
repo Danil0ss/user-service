@@ -60,7 +60,7 @@ public class PaymentCardController {
 
 
     @DeleteMapping("/{userId}/cards/{cardId}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCard(
             @PathVariable Long userId,
             @PathVariable Long cardId
