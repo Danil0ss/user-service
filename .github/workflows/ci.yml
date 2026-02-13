@@ -22,15 +22,21 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Fix Docker Permissions
-        run: sudo chmod 666 /var/run/docker.sock
+      - name: Configure Testcontainers
+        run: |
+          sudo chmod 666 /var/run/docker.sock
+          
+          echo "docker.host=unix:///var/run/docker.sock" > $HOME/.testcontainers.properties
+          echo "testcontainers.reuse.enable=true" >> $HOME/.testcontainers.properties
+          echo "testcontainers.ryuk.disabled=true" >> $HOME/.testcontainers.properties
+          
+          cat $HOME/.testcontainers.properties
 
       - name: Build and Test
         run: mvn -B verify
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DOCKER_HOST: unix:///var/run/docker.sock
-          TESTCONTAINERS_RYUK_DISABLED: true
+
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
