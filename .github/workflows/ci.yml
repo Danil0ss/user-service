@@ -22,14 +22,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Check Docker
-        run: docker info
+      - name: Fix Docker Permissions
+        run: sudo chmod 666 /var/run/docker.sock
+
       - name: Build and Test
         run: mvn -B verify
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DOCKER_HOST: unix:///var/run/docker.sock
-
           TESTCONTAINERS_RYUK_DISABLED: true
 
       - name: Login to DockerHub
@@ -45,7 +45,6 @@ jobs:
         with:
           context: .
           push: true
-          file: ./Dockerfile
           tags: |
             danil0ss/user-service:latest
             danil0ss/user-service:${{ github.sha }}
