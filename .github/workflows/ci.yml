@@ -22,21 +22,27 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Configure Testcontainers
+      - name: Prepare Docker Environment
         run: |
+          # 1. Даем права на сокет
           sudo chmod 666 /var/run/docker.sock
           
-          echo "docker.host=unix:///var/run/docker.sock" > $HOME/.testcontainers.properties
-          echo "testcontainers.reuse.enable=true" >> $HOME/.testcontainers.properties
-          echo "testcontainers.ryuk.disabled=true" >> $HOME/.testcontainers.properties
+          # 2. УДАЛЯЕМ конфиг докера. Это критично!
+          # GitHub Actions иногда подсовывает конфиг с 'credsStore', который ломает Testcontainers в Linux.
+          rm -f $HOME/.docker/config.json || true
           
-          cat $HOME/.testcontainers.properties
+          # 3. Проверка
+          docker info
 
       - name: Build and Test
-        run: mvn -B verify
+        # Передаем настройки прямо в JVM через флаги -D
+        run: >
+          mvn -B verify
+          -Ddocker.host=unix:///var/run/docker.sock
+          -Dtestcontainers.ryuk.disabled=true
+          -Djava.net.preferIPv4Stack=true
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
