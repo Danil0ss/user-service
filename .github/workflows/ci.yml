@@ -22,17 +22,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Configure Testcontainers
-        run: |
-          echo "docker.client.strategy=org.testcontainers.dockerclient.UnixSocketClientProviderStrategy" > ~/.testcontainers.properties
-          mkdir -p src/test/resources
-          echo "apiVersion=1.44" > src/test/resources/docker-java.properties
+      - name: Configure Testcontainers Strategy
+        run: echo "docker.client.strategy=org.testcontainers.dockerclient.UnixSocketClientProviderStrategy" > ~/.testcontainers.properties
 
       - name: Build and Test
-        run: >
-          mvn -B clean verify 
-          -Dtestcontainers.ryuk.disabled=true 
-          -Dorg.testcontainers.dockerclient.UnixSocketClientProviderStrategy.dockerSocketOverride=/var/run/docker.sock
+        run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 

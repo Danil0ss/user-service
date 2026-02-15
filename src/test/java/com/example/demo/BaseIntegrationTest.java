@@ -13,14 +13,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public abstract class BaseIntegrationTest {
 
-
-    static {
-
-        System.setProperty("testcontainers.docker.client.strategy", "org.testcontainers.dockerclient.UnixSocketClientProviderStrategy");
-
-        System.setProperty("docker.host", "unix:///var/run/docker.sock");
-    }
-
     @Container
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("test-db")
@@ -35,7 +27,6 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.liquibase.enabled", () -> "true");
         registry.add("spring.cache.type", () -> "none");
         registry.add("spring.data.redis.repositories.enabled", () -> "false");
-
 
         registry.add("jwt.secret", () -> "dGVzdC1zZWNyZXQta2V5LWZvci1pbnRlZ3JhdGlvbi10ZXN0cy1tdXN0LWJlLWxvbmc=");
         registry.add("jwt.access-expiration", () -> "3600000");
