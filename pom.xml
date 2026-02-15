@@ -19,6 +19,7 @@
 		<java.version>21</java.version>
 		<testcontainers.version>1.20.4</testcontainers.version>
 		<mapstruct.version>1.6.0</mapstruct.version>
+		<lombok.version>1.18.36</lombok.version>
 	</properties>
 
 	<dependencies>
@@ -80,18 +81,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>5.14.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna-platform</artifactId>
-			<version>5.14.0</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>jakarta.validation</groupId>
 			<artifactId>jakarta.validation-api</artifactId>
