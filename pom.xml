@@ -67,21 +67,7 @@
 			<artifactId>testcontainers</artifactId>
 			<version>${testcontainers.version}</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.github.docker-java</groupId>
-					<artifactId>docker-java-transport-zerodep</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
-
-		<dependency>
-			<groupId>com.github.docker-java</groupId>
-			<artifactId>docker-java-transport-httpclient5</artifactId>
-			<version>3.4.0</version>
-			<scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -188,11 +174,6 @@
 						<goals><goal>report</goal></goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.2</version>
 			</plugin>
 		</plugins>
 	</build>

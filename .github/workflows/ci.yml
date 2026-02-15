@@ -22,10 +22,10 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Create configs
+      - name: Configure Docker for Testcontainers
         run: |
-          mkdir -p target/test-classes
-          echo "apiVersion=1.44" > target/test-classes/docker-java.properties
+          mkdir -p src/test/resources
+          echo "apiVersion=1.44" > src/test/resources/docker-java.properties
 
       - name: Build and Test
         run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
