@@ -35,7 +35,6 @@ class UserServiceImplTest {
 
     @Test
     void createUser_ShouldSaveAndReturnUserDto() {
-        // GIVEN
         UserCreateDTO createDto = new UserCreateDTO();
         createDto.setName("John");
 
@@ -54,10 +53,8 @@ class UserServiceImplTest {
         when(userRepository.save(userToSave)).thenReturn(savedUser);
         when(userMapper.toDto(savedUser)).thenReturn(expectedResponse);
 
-        // WHEN
         UserResponseDTO actualResponse = userService.createUser(createDto);
 
-        // THEN (Используем AssertJ - это красивее)
         assertThat(actualResponse).isNotNull();
         assertThat(actualResponse.getId()).isEqualTo(1L);
         assertThat(actualResponse.getName()).isEqualTo("John");
