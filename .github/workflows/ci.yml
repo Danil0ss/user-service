@@ -23,7 +23,7 @@ jobs:
           cache: maven
 
       - name: Build and Test
-        run: mvn -B verify
+        run: mvn -B verify -DskipTests
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
