@@ -6,7 +6,8 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.2</version> <relativePath/>
+		<version>3.4.2</version>
+		<relativePath/>
 	</parent>
 
 	<groupId>com.innowise.internship</groupId>
@@ -17,8 +18,21 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<testcontainers.version>1.20.4</testcontainers.version>
 		<mapstruct.version>1.6.0</mapstruct.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
