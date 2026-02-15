@@ -22,8 +22,10 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Configure Testcontainers Strategy
-        run: echo "docker.client.strategy=org.testcontainers.dockerclient.UnixSocketClientProviderStrategy" > ~/.testcontainers.properties
+      - name: Create configs
+        run: |
+          mkdir -p target/test-classes
+          echo "apiVersion=1.44" > target/test-classes/docker-java.properties
 
       - name: Build and Test
         run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
