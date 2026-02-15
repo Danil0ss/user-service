@@ -39,6 +39,5 @@ jobs:
           context: .
           push: true
           tags: |
-            # Замени на свой юзернейм, если он отличается
             danil0ss/user-service:latest
             danil0ss/user-service:${{ github.sha }}
