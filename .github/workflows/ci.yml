@@ -21,10 +21,15 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
+      - name: Check Docker
+        run: docker info
+
       - name: Build and Test
         run: mvn -B clean verify
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DOCKER_HOST: unix:///var/run/docker.sock
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
