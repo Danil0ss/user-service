@@ -22,13 +22,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Configure Docker for Testcontainers
-        run: |
-          mkdir -p src/test/resources
-          echo "apiVersion=1.44" > src/test/resources/docker-java.properties
-
       - name: Build and Test
-        run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
+        run: mvn -B clean verify
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
