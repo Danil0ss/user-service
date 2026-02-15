@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -23,9 +23,10 @@ jobs:
           cache: maven
 
       - name: Build and Test
-        run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
+        run: mvn -B clean verify -Dtestcontainers.checks.disable=true
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DOCKER_HOST: unix:///var/run/docker.sock
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
