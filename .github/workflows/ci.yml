@@ -23,10 +23,10 @@ jobs:
           cache: maven
 
       - name: Build and Test
-        run: mvn -B clean verify
+        run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DOCKER_API_VERSION: '1.44'
+          DOCKER_API_VERSION: 1.44
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
