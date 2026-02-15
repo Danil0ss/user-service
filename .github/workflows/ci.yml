@@ -23,7 +23,7 @@ jobs:
           cache: maven
 
       - name: Build and Test
-        run: mvn -B clean verify
+        run: mvn -B clean verify -U
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
