@@ -22,11 +22,20 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Configure Docker Java
+        run: |
+          mkdir -p src/test/resources
+          # Задаем конкретный транспорт и версию API
+          echo "transport.type=httpclient5" > src/test/resources/docker-java.properties
+          echo "apiVersion=1.44" >> src/test/resources/docker-java.properties
+          
+          # Отключаем проверки Testcontainers, которые могут шуметь
+          echo "checks.disable=true" > ~/.testcontainers.properties
+
       - name: Build and Test
         run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
