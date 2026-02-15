@@ -22,11 +22,16 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Configure Docker for Tests
+        run: |
+          mkdir -p src/test/resources
+          echo "apiVersion=1.44" > src/test/resources/docker-java.properties
+          echo "docker.client.strategy=org.testcontainers.dockerclient.UnixSocketClientProviderStrategy" > ~/.testcontainers.properties
+
       - name: Build and Test
         run: mvn -B clean verify -Dtestcontainers.ryuk.disabled=true
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DOCKER_API_VERSION: 1.44
 
       - name: Login to DockerHub
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
